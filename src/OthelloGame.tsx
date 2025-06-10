@@ -271,7 +271,7 @@ export default function OthelloGame() {
       (currentPlayer === "black" && firstPlayerType === "ai") ||
       (currentPlayer === "white" && secondPlayerType === "ai");
 
-    // Count stones
+    // Stone counts
     const blackCount = countStones("black");
     const whiteCount = countStones("white");
     const totalStones = blackCount + whiteCount;
@@ -300,9 +300,9 @@ export default function OthelloGame() {
       return; // Game ended, no further AI actions
     }
 
-    // MARK: Pass handling (if game not ended and current player has no valid moves)
+    // MARK: Pass handling
+    // Check if the current player (AI or Human) has no valid moves
     if (movesForCurrentPlayer.length === 0) {
-      // Current player must pass (opponent has moves)
       setTimeout(() => {
         setHistory((prev) => [
           ...prev, // Add pass move to history
@@ -319,20 +319,14 @@ export default function OthelloGame() {
         // Clear hint when AI moves or passes
         setShowHint(false);
         setHintMove(null);
-      }, 500);
-      return; // Passed, so no further AI move logic
+      }, 500); // Add a small delay for better UX on pass
+      return; // Passed, so no further AI move logic for this turn
     }
 
-    // MARK: AI Action Processing (if game not ended, not a pass, and it's AI's turn)
+    // MARK: AI Action Processing (if it's AI's turn and AI has valid moves)
     if (isAIPlayerTurn) {
       // If AI action is already in progress, do not duplicate actions
       if (isProcessingAIMove) {
-        return;
-      }
-
-      // Guard against cases where AI's turn has no valid moves (should be handled by pass logic, but for safety)
-      if (movesForCurrentPlayer.length === 0) {
-        setIsProcessingAIMove(false); // End processing, reset flag
         return;
       }
 
@@ -341,7 +335,7 @@ export default function OthelloGame() {
       setShowHint(false);
       setHintMove(null);
 
-      // If AI has valid moves, find the optimal move using minimax
+      // Find the optimal move using minimax
       const [x, y] = minimax(
         board,
         aiDepth,
@@ -661,7 +655,10 @@ export default function OthelloGame() {
 
   return (
     <div className={`othello ${darkMode ? "dark" : "light"}`}>
-      <h2>Reversi</h2>
+      {/* Title with version number */}
+      <h1>
+        Reversi <span className="version-number">(1.0完全版)</span>
+      </h1>
       {/* Container for control buttons and mode settings */}
       <div className="controls-container">
         <div className="controls-top-left">
