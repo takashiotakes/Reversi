@@ -267,7 +267,7 @@ export default function OthelloGame() {
     const isCurrentPlayerAI =
       (currentPlayer === "black" && firstPlayerType === "ai") ||
       (currentPlayer === "white" && secondPlayerType === "ai");
-
+    
     const isNextPlayerAI =
       (nextPlayer(currentPlayer) === "black" && firstPlayerType === "ai") ||
       (nextPlayer(currentPlayer) === "white" && secondPlayerType === "ai");
@@ -305,9 +305,8 @@ export default function OthelloGame() {
       // If current player has no moves, and it's an AI's turn, or if it's a human's turn
       // but they are forced to pass because no moves are available.
       // Important: Only proceed if AI is not already processing
-      if (isProcessingAIMove) {
-        // If AI is already processing a move (or previous pass), prevent double processing
-        return;
+      if (isProcessingAIMove) { // If AI is already processing a move (or previous pass), prevent double processing
+          return;
       }
       setIsProcessingAIMove(true); // Indicate that a pass action is being processed
       setTimeout(() => {
@@ -331,8 +330,7 @@ export default function OthelloGame() {
 
     // MARK: AI Action Processing (if it's AI's turn and game not ended, not a pass)
     if (isCurrentPlayerAI) {
-      if (isProcessingAIMove) {
-        // If AI is already processing a move, prevent double processing
+      if (isProcessingAIMove) { // If AI is already processing a move, prevent double processing
         return;
       }
 
@@ -657,22 +655,9 @@ export default function OthelloGame() {
 
   return (
     <div className={`othello ${darkMode ? "dark" : "light"}`}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          width: "100%",
-          maxWidth: "800px",
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: '100%', maxWidth: '800px' }}>
         <h2>Reversi</h2>
-        <span
-          style={{ fontSize: "0.9em", marginLeft: "auto", marginRight: "10px" }}
-        >
-          1.1版
-        </span>{" "}
-        {/* 版数表示の変更 */}
+        <span style={{ fontSize: '0.9em', marginLeft: 'auto', marginRight: '10px' }}>1.1版</span> {/* 版数表示の変更 */}
       </div>
 
       {/* Container for control buttons and mode settings */}
@@ -754,9 +739,7 @@ export default function OthelloGame() {
           <div className="board-grid-container">
             {/* Inner padding for board cells */}
             <div className="board-inner-padding">
-              {board.map((row, y) => (
-                <div className="row" key={y}>
-                  {row.map((cell, x) => {
+              {board.map((row, y) => row.map((cell, x) => {
                     // Determine if it's a valid move
                     const isValid = validMoves.some(
                       ([vx, vy]) => vx === x && vy === y
@@ -796,10 +779,8 @@ export default function OthelloGame() {
                         )}{" "}
                         {/* Adjust to not overlap with hint */}
                       </div>
-                    );
-                  })}
-                </div>
-              ))}
+                    );})
+              )}
             </div>
           </div>
         </div>

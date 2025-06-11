@@ -1,10 +1,9 @@
 .othello {
   font-family: sans-serif;
-  text-align: center;
-  padding: 10px;
+  padding: 10px; /* Base padding for the entire game area */
   display: flex;
   flex-direction: column; /* Align content vertically */
-  align-items: flex-start; /* Align content to the top */
+  align-items: center; /* Center content horizontally */
 }
 
 /* Container for all control buttons */
@@ -60,9 +59,9 @@
   align-items: center; /* Vertically center */
   gap: 10px; /* Space between elements */
   margin-bottom: 10px; /* Adjusted spacing */
-  /* flex-wrap: wrap; Removed to force elements into one line */
   width: 100%; /* Extend to full width of parent */
   box-sizing: border-box;
+  flex-wrap: wrap; /* Allow wrapping for smaller screens */
 }
 
 .player-select-group,
@@ -153,48 +152,51 @@
   align-items: flex-start; /* Aligned to the left */
   width: 100%; /* Use full width on small screens */
   max-width: 300px; /* Max width on larger screens */
+  /* Remove border, background, shadow, padding */
+  /* border: 1px solid #ccc; */
+  /* border-radius: 8px; */
+  /* background-color: #f9f9f9; */
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+  /* padding: 10px; */
+  box-sizing: border-box; /* Include padding in width */
 }
 
 /* Adjustments for info panel on screens 768px and wider */
 @media (min-width: 768px) {
   .info-panel {
-    flex-direction: column; /* Maintain vertical arrangement */
-    justify-content: flex-start; /* Align to the top */
-    align-items: flex-start; /* Maintain left alignment */
+    max-width: 250px; /* Smaller width when beside the board */
+    min-width: 200px;
   }
 }
 
 /* --- CSS Variables for consistent sizing --- */
 :root {
-  --cell-content-size: 40px; /* Base size of a cell's content area (e.g., for disc) */
+  --cell-size: 40px; /* Each cell will be 40px x 40px */
+  --coord-label-size: 20px; /* Size for coordinate labels (A-H, 1-8) */
+  --board-border-width: 4px; /* Thick border around the main board grid */
+  --board-padding: 8px; /* Padding inside the main board grid container */
   --cell-border-width: 1px; /* Border of each cell */
-  --cell-size-with-border: calc(
-    var(--cell-content-size) + var(--cell-border-width) * 2
-  ); /* 40 + 1*2 = 42px */
-  --board-inner-padding-width: 4px; /* Padding inside board-grid-container */
-  --board-outer-border-width: 2px; /* Border of board-grid-container */
-  --coord-label-size: var(
-    --cell-size-with-border
-  ); /* Coordinate label size matches cell visual size */
 }
 
 /* Main wrapper for the entire board with coordinates using CSS Grid */
 .board-and-coords-wrapper {
   display: grid;
-  /* 9 columns: 1st for vertical coords, next 8 for board columns */
-  grid-template-columns: var(--coord-label-size) repeat(
-      8,
-      var(--cell-size-with-border)
-    );
-  /* 9 rows: 1st for horizontal coords, next 8 for board rows */
-  grid-template-rows: var(--coord-label-size) repeat(
-      8,
-      var(--cell-size-with-border)
-    );
-  justify-content: center; /* Center the entire grid horizontally */
-  align-content: center; /* Center the entire grid vertically */
-  margin: 0; /* No margin needed as parent flexbox handles centering */
-  border-radius: 10px; /* More rounded corners */
+  /* Columns: 1st for vertical coords, next 8 for board columns */
+  grid-template-columns: var(--coord-label-size) repeat(8, var(--cell-size));
+  /* Rows: 1st for horizontal coords, next 8 for board rows */
+  grid-template-rows: var(--coord-label-size) repeat(8, var(--cell-size));
+
+  /* Calculate total size for the board and coordinates.
+     8 cells * cell-size + 2 * coord-label-size */
+  width: calc(8 * var(--cell-size) + var(--coord-label-size));
+  height: calc(8 * var(--cell-size) + var(--coord-label-size));
+
+  /* Scale down the entire wrapper to 95% */
+  transform: scale(0.95);
+  transform-origin: top center; /* Scale from top-center to keep it centered */
+
+  /* Ensure the scaled content remains centered */
+  margin: 0 auto; /* Center the board */
 }
 
 /* Top-left empty corner cell (at grid position 1,1) */
@@ -211,6 +213,8 @@
   grid-column: 2 / span 8; /* Starts from 2nd column, spans 8 columns */
   grid-row: 1; /* First row */
   display: flex;
+  justify-content: space-around; /* Distribute A-H labels */
+  align-items: center;
 }
 
 /* Vertical coordinate labels container (1-8) */
@@ -219,6 +223,8 @@
   grid-row: 2 / span 8; /* Starts from 2nd row, spans 8 rows */
   display: flex;
   flex-direction: column;
+  justify-content: space-around; /* Distribute 1-8 labels */
+  align-items: center;
 }
 
 /* Common style for all coordinate labels (A-H and 1-8) */
@@ -242,64 +248,51 @@
   grid-column: 2 / span 8; /* Starts from 2nd column, spans 8 columns */
   grid-row: 2 / span 8; /* Starts from 2nd row, spans 8 rows */
 
-  background-color: #228b22; /* Board green color */
-  border-radius: 8px; /* Rounded corners for the board itself */
-  border: var(--board-outer-border-width) solid #004d00; /* Thicker outer border */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+  background-color: #008000; /* Dark green board background */
+  border: var(--board-border-width) solid #333; /* Thick dark border */
+  border-radius: 8px; /* Slightly rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow */
   box-sizing: border-box; /* Include border in element's total width/height */
 
-  width: calc(
-    var(--cell-size-with-border) * 8 + var(--board-inner-padding-width) * 2 +
-      var(--board-outer-border-width) * 2
-  );
-  height: calc(
-    var(--cell-size-with-border) * 8 + var(--board-inner-padding-width) * 2 +
-      var(--board-outer-border-width) * 2
-  );
+  /* The actual board grid is 8x8 cells */
+  width: calc(8 * var(--cell-size) + 2 * var(--board-padding));
+  height: calc(8 * var(--cell-size) + 2 * var(--board-padding));
 
-  display: flex;
+  display: flex; /* Use flex to center the inner-padding */
   justify-content: center;
   align-items: center;
+  padding: var(--board-padding); /* Padding inside for the cells */
 }
 
 /* Inner padding for the board cells */
 .board-inner-padding {
-  padding: var(--board-inner-padding-width);
-  display: flex;
-  flex-direction: column;
-  width: calc(
-    var(--cell-content-size) * 8 + var(--cell-border-width) * 8 * 2
-  ); /* Accurate board size calculation */
-  height: calc(
-    var(--cell-content-size) * 8 + var(--cell-border-width) * 8 * 2
-  ); /* Accurate board size calculation */
-  box-sizing: border-box;
-}
-
-/* Each row of cells within the board */
-.row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(8, var(--cell-size));
+  grid-template-rows: repeat(8, var(--cell-size));
+  gap: 1px; /* Small gap between cells to create grid lines */
+  background-color: #006000; /* Slightly darker green for cell borders */
 }
 
 /* Each individual cell */
 .cell {
-  width: var(--cell-content-size);
-  height: var(--cell-content-size);
-  border: var(--cell-border-width) solid #006400;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background-color: #00a000; /* Lighter green for cells */
+  border: 1px solid #007000; /* Slightly darker green border for cells */
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #228b22;
   position: relative;
   box-sizing: border-box;
   overflow: hidden; /* Ensure disc doesn't overflow during transform */
   perspective: 400px; /* Perspective for 3D effect on child discs */
+  cursor: pointer;
 }
 
 /* Styles for the discs (stones) */
 .disc {
-  width: 32px;
-  height: 32px;
+  width: 90%; /* Discs are slightly smaller than the cell */
+  height: 90%;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -316,10 +309,12 @@
 /* Disc colors */
 .disc.black {
   background-color: black;
+  background-image: radial-gradient(circle at 30% 30%, #444, #000 80%);
 }
 
 .disc.white {
   background-color: white;
+  background-image: radial-gradient(circle at 30% 30%, #eee, #fff 80%);
 }
 
 /* Keyframe animation for the disc flip effect */
@@ -329,20 +324,15 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Initial soft shadow */
   }
   49% {
-    /* Just before the full flip to edge */
     transform: rotateY(89deg);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
   50% {
-    /* At the exact 90-degree flip (edge-on) */
     transform: rotateY(90deg);
     background-color: #555; /* Dark grey for the 'edge' color to simulate thickness */
-    /* Simulate 20mm thickness with a wider box-shadow spread along the axis of rotation (10px on each side) */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7),
-      /* General shadow */ 0 0 0 20px #666; /* This creates a 40px band (20px on each side) to mimic thickness (4x previous 5px) */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7), 0 0 0 20px #666; /* Simulate thickness */
   }
   51% {
-    /* Just after the full flip to edge */
     transform: rotateY(91deg);
     background-color: #555; /* Keep edge color briefly */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.7), 0 0 0 20px #666;
@@ -364,14 +354,16 @@
 }
 
 .valid-move {
-  background-color: #32cd32;
+  background-color: #2c9a2c; /* Lighter green for valid move cells */
 }
 
 .hint {
-  width: 30%;
-  height: 30%;
-  background-color: #32cd32;
+  width: 10px; /* Smaller dot for hint */
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white dot */
   border-radius: 50%;
+  position: absolute;
+  pointer-events: none; /* Allows click through to the cell */
 }
 
 /* New hint display class (yellow) */
@@ -402,8 +394,6 @@
 /* Kifu container (wraps a single table) */
 .kifu-container {
   width: 100%;
-  /* overflow-y: auto; removed */
-  /* max-height: 300px; removed */
   margin-top: 5px; /* Adjusted spacing from Kifu title */
 }
 
