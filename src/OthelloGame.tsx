@@ -210,7 +210,7 @@ export default function OthelloGame() {
   ); // 2P (White)
 
   // AI's thinking depth (difficulty)
-  const [aiDepth, setAiDepth] = useState(1);
+  const [aiDepth, setAiDepth] = useState(3);
   // Dark mode enabled/disabled
   const [darkMode, setDarkMode] = useState(false);
   // Game result message
@@ -248,7 +248,6 @@ export default function OthelloGame() {
   // Triggered when game state (board, player, mode, etc.) changes
   useEffect(() => {
     // If game has already ended, do not proceed with AI or pass logic
-    // If `gameResult` is set, the game has already ended.
     if (gameResult) {
       setIsProcessingAIMove(false); // Reset flag just in case
       return;
@@ -259,19 +258,21 @@ export default function OthelloGame() {
       return;
     }
 
-    // Current and next player's valid moves
     const movesForCurrentPlayer = getValidMoves(board, currentPlayer);
     const oppMovesForNextPlayer = getValidMoves(
       board,
       nextPlayer(currentPlayer)
     );
 
-    // Determine if it's currently an AI player's turn
-    const isAIPlayerTurn =
+    const isCurrentPlayerAI =
       (currentPlayer === "black" && firstPlayerType === "ai") ||
       (currentPlayer === "white" && secondPlayerType === "ai");
 
-    // Stone counts
+    const isNextPlayerAI =
+      (nextPlayer(currentPlayer) === "black" && firstPlayerType === "ai") ||
+      (nextPlayer(currentPlayer) === "white" && secondPlayerType === "ai");
+
+    // Count stones
     const blackCount = countStones("black");
     const whiteCount = countStones("white");
     const totalStones = blackCount + whiteCount;
@@ -287,7 +288,6 @@ export default function OthelloGame() {
       currentMove === 60
     ) {
       // Game end processing
-      // Recalculate final stone counts and set result
       const finalBlackCount = countStones("black");
       const finalWhiteCount = countStones("white");
 
@@ -297,45 +297,49 @@ export default function OthelloGame() {
         setGameResult("白の勝ち"); // White wins
       else setGameResult("引き分け"); // Draw
       setIsProcessingAIMove(false); // Reset AI processing flag
-      return; // Game ended, no further AI actions
+      return; // Game ended, no further actions
     }
 
-    // MARK: Pass handling
-    // Check if the current player (AI or Human) has no valid moves
+    // MARK: Pass handling (if current player has no valid moves)
     if (movesForCurrentPlayer.length === 0) {
+      // If current player has no moves, and it's an AI's turn, or if it's a human's turn
+      // but they are forced to pass because no moves are available.
+      // Important: Only proceed if AI is not already processing
+      if (isProcessingAIMove) {
+        // If AI is already processing a move (or previous pass), prevent double processing
+        return;
+      }
+      setIsProcessingAIMove(true); // Indicate that a pass action is being processed
       setTimeout(() => {
         setHistory((prev) => [
-          ...prev, // Add pass move to history
+          ...prev,
           {
             board,
             player: nextPlayer(currentPlayer),
             movePos: null,
-            isAIMove: isAIPlayerTurn,
-          }, // Flag if AI passed or human
+            isAIMove: isCurrentPlayerAI, // Record whether the passing player was AI
+          },
         ]);
         setCurrentMove((m) => m + 1);
-        setGameResult(""); // Reset result as it's a new turn
-        setIsProcessingAIMove(false); // Processing complete
-        // Clear hint when AI moves or passes
+        setGameResult("");
+        setIsProcessingAIMove(false); // Reset after pass is recorded
         setShowHint(false);
         setHintMove(null);
-      }, 500); // Add a small delay for better UX on pass
-      return; // Passed, so no further AI move logic for this turn
+      }, 500); // Small delay for pass effect
+      return; // Handled pass, no further AI or human move logic for this turn
     }
 
-    // MARK: AI Action Processing (if it's AI's turn and AI has valid moves)
-    if (isAIPlayerTurn) {
-      // If AI action is already in progress, do not duplicate actions
+    // MARK: AI Action Processing (if it's AI's turn and game not ended, not a pass)
+    if (isCurrentPlayerAI) {
       if (isProcessingAIMove) {
+        // If AI is already processing a move, prevent double processing
         return;
       }
 
       setIsProcessingAIMove(true); // Set flag to indicate AI action in progress
-      // Clear hint when AI moves
       setShowHint(false);
       setHintMove(null);
 
-      // Find the optimal move using minimax
       const [x, y] = minimax(
         board,
         aiDepth,
@@ -345,9 +349,7 @@ export default function OthelloGame() {
         Infinity
       );
 
-      // If a valid move is found (x !== -1, y !== -1)
       if (x !== -1 && y !== -1) {
-        // Apply AI move after a short delay
         setTimeout(() => {
           const { newBoard, flippedCoords } = applyMove(
             board,
@@ -356,27 +358,27 @@ export default function OthelloGame() {
             currentPlayer,
             audioRef.current
           );
-          setFlippedStones(flippedCoords); // Set coordinates of flipped stones for animation
+          setFlippedStones(flippedCoords);
 
           setHistory((prev) => [
-            ...prev, // Add AI move to history
+            ...prev,
             {
               board: newBoard,
-              player: nextPlayer(currentPlayer), // Next player's turn
+              player: nextPlayer(currentPlayer),
               movePos: [x, y],
-              isAIMove: true, // Record as AI move
+              isAIMove: true,
             },
           ]);
-          setCurrentMove((m) => m + 1); // Advance to next move
-          setGameResult(""); // Reset game result
-          setIsProcessingAIMove(false); // Processing complete
+          setCurrentMove((m) => m + 1);
+          setGameResult("");
+          setIsProcessingAIMove(false); // AI move completed, reset flag
 
-          // Clear flippedStones after animation ends
-          setTimeout(() => setFlippedStones([]), 500); // Match CSS animation duration
-        }, 500); // 0.5 second AI move delay
+          setTimeout(() => setFlippedStones([]), 500);
+        }, 500);
       } else {
-        // In case minimax returns -1 even if valid moves exist (should not happen normally)
-        setIsProcessingAIMove(false); // End processing, reset flag
+        // This case should ideally be caught by the `movesForCurrentPlayer.length === 0` check
+        // but as a fallback, if minimax somehow fails to find a move, ensure AI processing is reset.
+        setIsProcessingAIMove(false);
       }
     }
   }, [
@@ -388,9 +390,9 @@ export default function OthelloGame() {
     secondPlayerType,
     aiDepth,
     nextPlayer,
-    isProcessingAIMove,
     gameResult,
-  ]); // Update dependencies
+    // isProcessingAIMove はここから削除
+  ]);
 
   // Handles cell click (for human player)
   const handleClick = (x: number, y: number) => {
@@ -399,8 +401,8 @@ export default function OthelloGame() {
       (currentPlayer === "black" && firstPlayerType === "human") ||
       (currentPlayer === "white" && secondPlayerType === "human");
 
-    // If not human player's turn, disable operation
-    if (!isHumanPlayerTurn) return;
+    // If not human player's turn, or AI is processing, disable operation
+    if (!isHumanPlayerTurn || isProcessingAIMove) return;
 
     // If clicked position is not a valid move, disable operation
     if (!validMoves.some(([vx, vy]) => vx === x && vy === y)) return;
@@ -655,10 +657,24 @@ export default function OthelloGame() {
 
   return (
     <div className={`othello ${darkMode ? "dark" : "light"}`}>
-      {/* Title with version number */}
-      <h1>
-        Reversi <span className="version-number">(1.0完全版)</span>
-      </h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          width: "100%",
+          maxWidth: "800px",
+        }}
+      >
+        <h2>Reversi</h2>
+        <span
+          style={{ fontSize: "0.9em", marginLeft: "auto", marginRight: "10px" }}
+        >
+          1.1版
+        </span>{" "}
+        {/* 版数表示の変更 */}
+      </div>
+
       {/* Container for control buttons and mode settings */}
       <div className="controls-container">
         <div className="controls-top-left">
@@ -679,6 +695,7 @@ export default function OthelloGame() {
               // Clear hint on reset
               setShowHint(false);
               setHintMove(null);
+              setIsProcessingAIMove(false); // Reset AI processing flag on reset
             }}
           >
             リセット
@@ -695,13 +712,13 @@ export default function OthelloGame() {
           {" "}
           {/* Right group of controls */}
           <button
-            disabled={currentMove <= 0} // Disable if at initial board
+            disabled={currentMove <= 0 || isProcessingAIMove} // Disable if at initial board or AI is processing
             onClick={handleUndo}
           >
             戻る {/* Back */}
           </button>
           <button
-            disabled={currentMove >= history.length - 1} // Disable if at end of history
+            disabled={currentMove >= history.length - 1 || isProcessingAIMove} // Disable if at end of history or AI is processing
             onClick={handleRedo}
           >
             進む {/* Forward */}
