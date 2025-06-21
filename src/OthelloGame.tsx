@@ -292,10 +292,10 @@ export default function OthelloGame() {
       const finalWhiteCount = countStones("white");
 
       if (finalBlackCount > finalWhiteCount)
-        setGameResult("黒の勝ち"); // Black wins
+        setGameResult("Black wins"); // Black wins
       else if (finalWhiteCount > finalBlackCount)
-        setGameResult("白の勝ち"); // White wins
-      else setGameResult("引き分け"); // Draw
+        setGameResult("White wins"); // White wins
+      else setGameResult("Draw"); // Draw
       setIsProcessingAIMove(false); // Reset AI processing flag
       return; // Game ended, no further actions
     }
@@ -389,7 +389,7 @@ export default function OthelloGame() {
     aiDepth,
     nextPlayer,
     gameResult,
-    // isProcessingAIMove はここから削除
+    // isProcessingAIMove is removed from here
   ]);
 
   // Handles cell click (for human player)
@@ -557,7 +557,7 @@ export default function OthelloGame() {
     // Cannot show hint if no valid moves
     if (validMoves.length === 0) {
       // TODO: Replace with custom modal
-      alert("打てる手がありません。"); // No moves available
+      alert("No moves available."); // No moves available
       return;
     }
 
@@ -577,7 +577,7 @@ export default function OthelloGame() {
       // No automatic hiding
     } else {
       // TODO: Replace with custom modal
-      alert("最善手を計算できませんでした。"); // Could not calculate optimal move
+      alert("Could not calculate optimal move."); // Could not calculate optimal move
     }
   }, [
     board,
@@ -606,7 +606,7 @@ export default function OthelloGame() {
         symbol = playerWhoMoved === "black" ? "●" : "◯"; // Filled circle for black in light mode
       }
 
-      let playerText = `${symbol} ${playerWhoMoved === "black" ? "黒" : "白"}`; // Black / White
+      let playerText = `${symbol} ${playerWhoMoved === "black" ? "Black" : "White"}`; // Black / White
       let coordinateText = "-";
 
       if (moveRecord.movePos) {
@@ -640,16 +640,16 @@ export default function OthelloGame() {
   // Message indicating whose turn it is
   const turnMessage = (() => {
     if (gameResult) return ""; // Do not display message if game has ended
-    const playerColor = currentPlayer === "black" ? "黒" : "白"; // Black / White
+    const playerColor = currentPlayer === "black" ? "Black" : "White"; // Black / White
 
     if (currentPlayer === "black") {
       return `${
         firstPlayerType === "human" ? "1P" : "AI"
-      }の手番です (${playerColor})`; // 1P's turn (Black) / AI's turn (Black)
+      }'s Turn (${playerColor})`; // 1P's turn (Black) / AI's turn (Black)
     } else {
       return `${
         secondPlayerType === "human" ? "2P" : "AI"
-      }の手番です (${playerColor})`; // 2P's turn (White) / AI's turn (White)
+      }'s Turn (${playerColor})`; // 2P's turn (White) / AI's turn (White)
     }
   })();
 
@@ -657,7 +657,7 @@ export default function OthelloGame() {
     <div className={`othello ${darkMode ? "dark" : "light"}`}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: '100%', maxWidth: '800px' }}>
         <h2>Reversi</h2>
-        <span style={{ fontSize: '0.9em', marginLeft: 'auto', marginRight: '10px' }}>1.1版</span> {/* 版数表示の変更 */}
+        <span style={{ fontSize: '0.9em', marginLeft: 'auto', marginRight: '10px' }}>v1.1</span> {/* Version display change */}
       </div>
 
       {/* Container for control buttons and mode settings */}
@@ -683,13 +683,13 @@ export default function OthelloGame() {
               setIsProcessingAIMove(false); // Reset AI processing flag on reset
             }}
           >
-            リセット
+            Reset
           </button>
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="dark-mode-button"
           >
-            {darkMode ? "ライトモード" : "ダークモード"}{" "}
+            {darkMode ? "Light Mode" : "Dark Mode"}{" "}
             {/* Light mode / Dark mode */}
           </button>
         </div>
@@ -700,13 +700,13 @@ export default function OthelloGame() {
             disabled={currentMove <= 0 || isProcessingAIMove} // Disable if at initial board or AI is processing
             onClick={handleUndo}
           >
-            戻る {/* Back */}
+            Undo {/* Back */}
           </button>
           <button
             disabled={currentMove >= history.length - 1 || isProcessingAIMove} // Disable if at end of history or AI is processing
             onClick={handleRedo}
           >
-            進む {/* Forward */}
+            Redo {/* Forward */}
           </button>
         </div>
       </div>
@@ -752,8 +752,7 @@ export default function OthelloGame() {
                     const isHint =
                       showHint &&
                       hintMove &&
-                      hintMove[0] === x &&
-                      hintMove[1] === y;
+                      hintMove[0] === x && hintMove[1] === y;
 
                     return (
                       <div
@@ -790,33 +789,33 @@ export default function OthelloGame() {
           {/* Mode selection, AI difficulty, Hint button */}
           <div className="game-settings">
             <div className="player-select-group">
-              先手: {/* First player */}
+              First Player: {/* First player */}
               <select
                 value={firstPlayerType}
                 onChange={(e) =>
                   setFirstPlayerType(e.target.value as "human" | "ai")
                 }
               >
-                <option value="human">人間</option> {/* Human */}
+                <option value="human">Human</option> {/* Human */}
                 <option value="ai">AI</option>
               </select>
             </div>
             <div className="player-select-group">
-              後手: {/* Second player */}
+              Second Player: {/* Second player */}
               <select
                 value={secondPlayerType}
                 onChange={(e) =>
                   setSecondPlayerType(e.target.value as "human" | "ai")
                 }
               >
-                <option value="human">人間</option> {/* Human */}
+                <option value="human">Human</option> {/* Human */}
                 <option value="ai">AI</option>
               </select>
             </div>
             {/* Display difficulty only if AI is involved in any mode */}
             {(firstPlayerType === "ai" || secondPlayerType === "ai") && (
               <div className="difficulty-select-group">
-                難易度: {/* Difficulty */}
+                Difficulty: {/* Difficulty */}
                 <select
                   value={aiDepth}
                   onChange={(e) => setAiDepth(Number(e.target.value))}
@@ -837,23 +836,23 @@ export default function OthelloGame() {
               } // Disable if not human player's turn, AI processing, or game ended
               className="hint-button"
             >
-              ヒント {/* Hint */}
+              Hint {/* Hint */}
             </button>
           </div>
           {/* Stone count display and turn message */}
           <div className="status-display">
             <div className="turn-message">{turnMessage}</div>
             <div className="stone-counts">
-              黒: {blackCount} 白: {whiteCount}{" "}
+              Black: {blackCount} White: {whiteCount}{" "}
               {/* Black: [count] White: [count] */}
             </div>
           </div>
           <audio ref={audioRef} src={flipSoundSrc} /> {/* Sound effect */}
           {/* Kifu title and game result */}
-          <h3>棋譜</h3> {/* Kifu */}
+          <h3>Game Record</h3> {/* Kifu */}
           {gameResult && (
             <div className="game-result">
-              結果: {gameResult} (白{whiteCount} : 黒{blackCount}){" "}
+              Result: {gameResult} (White {whiteCount} : Black {blackCount}){" "}
               {/* Result: [result] (White [count] : Black [count]) */}
             </div>
           )}
@@ -862,9 +861,9 @@ export default function OthelloGame() {
             <table className="kifu-table">
               <thead>
                 <tr>
-                  <th>手数</th> {/* Move */}
-                  <th>手番</th> {/* Player */}
-                  <th>座標</th> {/* Coordinate */}
+                  <th>Move</th> {/* Move */}
+                  <th>Player</th> {/* Player */}
+                  <th>Coord.</th> {/* Coordinate */}
                 </tr>
               </thead>
               <tbody>
